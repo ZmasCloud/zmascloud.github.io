@@ -767,7 +767,7 @@
             // 显示当前页附近页码
             for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
                 html += `
-                    <button class="page-button ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
+                    <button class="极狐button ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
                         ${i}
                     </button>
                 `;
@@ -788,7 +788,7 @@
             
             // 下一页按钮
             html += `
-                <button class="page-button" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                <button class="page-button" onclick="changePage(${current极狐 + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
                     <i class="fas fa-chevron-right"></i>
                 </button>
             `;
@@ -850,7 +850,7 @@
             }
         }
         
-        // 解析Markdown表格数据
+        // 解析Markdown表格数据 - 修复版
         function parseMarkdownTable(markdown) {
             const plugins = [];
             const lines = markdown.split('\n');
@@ -919,7 +919,7 @@
             return plugins;
         }
         
-        // 从GitHub加载数据
+        // 从GitHub加载数据 - 修复版
         async function loadPluginData() {
             try {
                 pluginsGrid.innerHTML = `
@@ -962,7 +962,7 @@
                         <h3 style="margin: 15px 0">数据加载失败</h3>
                         <p style="color: var(--light-text); margin-bottom: 20px">${error.message}</p>
                         <button class="control-btn" onclick="loadPluginData()">
-                            <i class="fas fa-redo"></i>
+                            <i class="fas fa-red极狐</i>
                             <span>重试加载</span>
                         </button>
                     </div>
