@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>麦麦插件列表 - 同步优化版</title>
+    <title>麦麦插件列表</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -606,7 +606,7 @@
                 lastSyncTime = new Date();
                 
                 // 使用您提供的原始数据URL
-                const response = await fetch('https://raw.githubusercontent.com/ZmasCloud/maiplugin/refs/heads/master/about.md');
+                const response = await fetch('https://raw.bgithub.xyz/ZmasCloud/maiplugin/refs/heads/master/about.md');
                 const text = await response.text();
                 
                 // 解析Markdown表格数据
