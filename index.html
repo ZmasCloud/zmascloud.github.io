@@ -318,7 +318,7 @@
             
             <div class="update-status">
                 <i class="fas fa-sync-alt pulse"></i>
-                <span>每5秒自动更新数据</span>
+                <span>每15秒自动更新数据</span>
             </div>
         </header>
         
@@ -515,8 +515,8 @@
             // 首次加载数据
             fetchPlugins();
             
-            // 每5秒自动更新数据
-            const intervalId = setInterval(fetchPlugins, 5000);
+            // 每15秒自动更新数据
+            const intervalId = setInterval(fetchPlugins, 15000);
             
             // 手动刷新按钮
             document.getElementById('manualRefresh').addEventListener('click', fetchPlugins);
