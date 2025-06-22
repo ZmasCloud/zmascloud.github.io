@@ -25,6 +25,9 @@
             --header-bg: linear-gradient(135deg, #4a6bff 0%, #6c5ce7 100%);
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             --hover-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            --success: #00c853;
+            --warning: #ff9100;
+            --info: #2196f3;
         }
         
         body {
@@ -34,8 +37,8 @@
             padding: 20px;
             min-height: 100vh;
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(74, 107, 255, 0.05) 0%, transparent 20%),
-                radial-gradient(circle at 80% 80%, rgba(108, 92, 231, 0.05) 0%, transparent 25%);
+                radial-gradient(circle at 10% 20%, rgba(74, 107, 255, 0.03) 0%, transparent 20%),
+                radial-gradient(circle at 80% 80%, rgba(108, 92, 231, 0.03) 0%, transparent 25%);
         }
         
         .container {
@@ -87,7 +90,7 @@
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(5px);
             border-radius: 8px;
-            padding: 10px 20px;
+            padding: 12px 20px;
             min-width: 150px;
         }
         
@@ -102,18 +105,19 @@
             opacity: 0.9;
         }
         
-        .update-status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
+        .sync-info {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 20px;
+            max-width: 500px;
+            margin: 20px auto 0;
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.9);
         }
         
-        .update-status i {
-            color: #00c9ff;
+        .sync-info i {
+            color: var(--accent-color);
+            margin-right: 8px;
         }
         
         .plugins-container {
@@ -122,6 +126,21 @@
             box-shadow: var(--shadow);
             overflow: hidden;
             margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .plugins-header {
+            padding: 15px 20px;
+            background: #f8fbff;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .last-updated {
+            font-size: 0.9rem;
+            color: var(--light-text);
         }
         
         .plugin-card {
@@ -244,8 +263,13 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: #00c853;
-            box-shadow: 0 0 8px #00c853;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+        
+        .warning .status-indicator {
+            background: var(--warning);
+            box-shadow: 0 0 8px var(--warning);
         }
         
         .refresh-btn {
@@ -264,6 +288,43 @@
         .refresh-btn:hover {
             background: var(--secondary-color);
             transform: translateY(-2px);
+        }
+        
+        .sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(33, 150, 243, 0.1);
+            color: var(--info);
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .sync-indicator i {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        
+        .sync-progress {
+            height: 4px;
+            background: rgba(0, 201, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 8px;
+            position: relative;
+        }
+        
+        .sync-progress-bar {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.5s ease;
         }
         
         @media (max-width: 768px) {
@@ -287,16 +348,6 @@
                 text-align: center;
             }
         }
-        
-        .pulse {
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { opacity: 0.8; }
-        }
     </style>
 </head>
 <body>
@@ -316,14 +367,26 @@
                 </div>
             </div>
             
-            <div class="update-status">
-                <i class="fas fa-sync-alt pulse"></i>
-                <span>每15秒自动更新数据</span>
+            <div class="sync-info">
+                <i class="fas fa-info-circle"></i>
+                <span>文档仓库同步有延迟（约5分钟），显示的数据可能不是最新版本</span>
             </div>
         </header>
         
         <div class="plugins-container" id="pluginsContainer">
-            <div class="loading">
+            <div class="plugins-header">
+                <div class="sync-indicator">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>正在同步数据...</span>
+                </div>
+                <div class="last-updated">文档同步时间: <span id="docSyncTime">未知</span></div>
+            </div>
+            
+            <div class="sync-progress">
+                <div class="sync-progress-bar" id="syncProgressBar"></div>
+            </div>
+            
+            <div class="loading" id="loading">
                 <i class="fas fa-spinner"></i>
                 <p>正在加载插件数据...</p>
             </div>
@@ -334,9 +397,9 @@
                 <div class="status-indicator"></div>
                 <span>系统运行中</span>
             </div>
-            <div class="status-item">
-                <i class="fas fa-database"></i>
-                <span>数据源: bgithub.xyz</span>
+            <div class="status-item warning">
+                <div class="status-indicator"></div>
+                <span>文档同步延迟: 约5分钟</span>
             </div>
             <button class="refresh-btn" id="manualRefresh">
                 <i class="fas fa-sync-alt"></i>
@@ -346,6 +409,11 @@
     </div>
 
     <script>
+        // 存储同步状态和计时器
+        let lastSyncTime = null;
+        let syncInterval = null;
+        let syncTimeout = 300; // 5分钟同步延迟（300秒）
+        
         // 可靠的Markdown表格解析函数
         function parseMarkdownTable(markdown) {
             const plugins = [];
@@ -425,17 +493,52 @@
             document.getElementById('lastUpdateTime').textContent = timeString;
         }
         
+        // 更新同步进度条
+        function updateSyncProgress() {
+            if (!lastSyncTime) return;
+            
+            const now = new Date();
+            const elapsed = (now - lastSyncTime) / 1000; // 已过秒数
+            const progress = Math.min(100, (elapsed / syncTimeout) * 100);
+            
+            document.getElementById('syncProgressBar').style.width = `${progress}%`;
+            
+            // 更新文档同步时间显示
+            if (lastSyncTime) {
+                const syncTime = new Date(lastSyncTime);
+                const syncTimeString = 
+                    `${syncTime.getHours().toString().padStart(2, '0')}:` +
+                    `${syncTime.getMinutes().toString().padStart(2, '0')}:` +
+                    `${syncTime.getSeconds().toString().padStart(2, '0')}`;
+                    
+                document.getElementById('docSyncTime').textContent = syncTimeString;
+            }
+        }
+        
         // 获取并显示插件数据
         async function fetchPlugins() {
             try {
                 // 显示加载状态
                 const pluginsContainer = document.getElementById('pluginsContainer');
                 pluginsContainer.innerHTML = `
+                    <div class="plugins-header">
+                        <div class="sync-indicator">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>正在同步数据...</span>
+                        </div>
+                        <div class="last-updated">文档同步时间: <span id="docSyncTime">更新中</span></div>
+                    </div>
+                    <div class="sync-progress">
+                        <div class="sync-progress-bar" id="syncProgressBar"></div>
+                    </div>
                     <div class="loading">
                         <i class="fas fa-spinner"></i>
                         <p>正在加载插件数据...</p>
                     </div>
                 `;
+                
+                // 记录同步开始时间
+                lastSyncTime = new Date();
                 
                 // 使用您提供的原始数据URL
                 const response = await fetch('https://raw.bgithub.xyz/ZmasCloud/maiplugin/refs/heads/master/about.md');
@@ -485,7 +588,19 @@
                 return;
             }
             
-            let html = '';
+            let html = `
+                <div class="plugins-header">
+                    <div class="sync-indicator">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <span>数据同步完成</span>
+                    </div>
+                    <div class="last-updated">文档同步时间: <span id="docSyncTime">${formatTime(lastSyncTime)}</span></div>
+                </div>
+                <div class="sync-progress">
+                    <div class="sync-progress-bar" style="width: 100%; background: var(--success);"></div>
+                </div>
+            `;
+            
             plugins.forEach(plugin => {
                 html += `
                     <div class="plugin-card">
@@ -508,6 +623,24 @@
             });
             
             container.innerHTML = html;
+            
+            // 5分钟后重置进度条
+            setTimeout(() => {
+                document.querySelector('.sync-indicator i').className = 'fas fa-sync-alt';
+                document.querySelector('.sync-indicator span').textContent = '等待下次同步...';
+                document.getElementById('syncProgressBar').style.width = '0%';
+                document.getElementById('syncProgressBar').style.background = 'var(--accent-color)';
+            }, syncTimeout * 1000);
+        }
+        
+        // 格式化时间
+        function formatTime(date) {
+            if (!date) return '未知';
+            return `
+                ${date.getHours().toString().padStart(2, '0')}:
+                ${date.getMinutes().toString().padStart(2, '0')}:
+                ${date.getSeconds().toString().padStart(2, '0')}
+            `;
         }
         
         // 初始化页面
@@ -515,8 +648,11 @@
             // 首次加载数据
             fetchPlugins();
             
-            // 每15秒自动更新数据
-            const intervalId = setInterval(fetchPlugins, 15000);
+            // 每30秒自动更新数据（根据您的同步延迟调整）
+            const intervalId = setInterval(fetchPlugins, 30000);
+            
+            // 每2秒更新一次同步进度条
+            setInterval(updateSyncProgress, 2000);
             
             // 手动刷新按钮
             document.getElementById('manualRefresh').addEventListener('click', fetchPlugins);
