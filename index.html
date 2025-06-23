@@ -9,7 +9,7 @@
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border极;
+            box-sizing: border-box;
             font-family: 'Segoe UI', 'Microsoft YaHei UI', sans-serif;
         }
         
@@ -22,7 +22,7 @@
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
             --border-color: #e1e5eb;
-            --header-bg: linear-gradient(135deg, #4a6bff 0%, #6c5ce7 100%);
+            --header-bg: linear-gradient(135deg, #4a极bff 0%, #6c5ce7 100%);
             --shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             --hover-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             --success: #00c853;
@@ -83,7 +83,7 @@
         }
         
         .app-controls {
-            display: flex;
+            display:极 flex;
             gap: 15px;
             align-items: center;
         }
@@ -110,7 +110,7 @@
         .stats-overview {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 极5px;
+            gap: 15px;
             margin-bottom: 20px;
         }
         
@@ -312,7 +312,7 @@
             justify-content: space-between;
             font-size: 0.9rem;
             color: var(--light-text);
-            margin-bottom: 8极;
+            margin-bottom: 8px;
         }
         
         .sync-progress {
@@ -550,7 +550,7 @@
         <div class="status-panel">
             <div class="panel-header">
                 <h2 class="panel-title">
-                    <i class="fas fa-info-circle"></i>
+                   极<i class="fas fa-info-circle"></i>
                     <span>数据同步状态</span>
                 </h2>
                 <div class="github-badge">GitHub API</div>
@@ -564,7 +564,7 @@
                 </div>
             </div>
             
-            <div class极="status-item">
+            <div class="status-item">
                 <i class="fas fa-check-circle"></i>
                 <div class="status-text">
                     <div>数据连接正常</div>
@@ -574,7 +574,7 @@
             
             <div class="status-item warning">
                 <i class="fas fa-clock"></i>
-                <极 class="status-text">
+                <div class="status-text">
                     <div>文档同步延迟: 约5分钟</div>
                     <div>建议等待数据完全同步后再使用</div>
                 </div>
@@ -616,7 +616,6 @@
                     <p><code>?api=1</code> - 返回所有插件数据</p>
                     <p><code>?api=1&search=关键词</code> - 搜索插件</p>
                     <p><code>?api=1&page=2</code> - 分页浏览插件</p>
-                    <p><strong>注意：</strong> API模式不会显示HTML界面，只返回JSON数据</p>
                 </div>
             </div>
             <button class="action-btn" id="viewApiButton" style="margin-top: 10px; width: 100%">
@@ -655,8 +654,7 @@
     </footer>
 
     <script>
-        // 修复后核心代码，添加真正常用的API端点
-        
+        // 修复后核心代码
         // 核心数据结构
         let pluginsData = [];
         let filteredPlugins = [];
@@ -679,81 +677,6 @@
         const refreshButton = document.getElementById('refreshButton');
         const jsonOutput = document.getElementById('jsonOutput');
         const viewApiButton = document.getElementById('viewApiButton');
-        
-        // 检查URL参数中是否有api=1
-        function isApiRequest() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('api') === '1';
-        }
-        
-        // 处理API请求（关键修复）
-        function handleApiRequest() {
-            // 获取URL参数
-            const urlParams = new URLSearchParams(window.location.search);
-            const searchTerm = urlParams.get('search') || '';
-            const page = parseInt(urlParams.get('page')) || 1;
-            
-            // 过滤数据
-            let apiPlugins = pluginsData;
-            if (searchTerm) {
-                apiPlugins = pluginsData.filter(plugin => 
-                    plugin.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                    plugin.repo.toLowerCase().includes(searchTerm.toLowerCase())
-                );
-            }
-            
-            // 分页
-            const totalPages = Math.ceil(apiPlugins.length / itemsPerPage);
-            const current = Math.min(Math.max(page, 1), totalPages);
-            const startIndex = (current - 1) * itemsPerPage;
-            const pagedPlugins = apiPlugins.slice(startIndex, startIndex + itemsPer极);
-            
-            // 构建API响应
-            const response = {
-                status: 'success',
-                apiVersion: 'v1',
-                parameters: {
-                    search: searchTerm,
-                    page: current,
-                    per_page: itemsPerPage,
-                    total_pages: totalPages,
-                    total_plugins: apiPlugins.length
-                },
-                plugins: pagedPlugins.map(plugin => ({
-                    name: plugin.name,
-                    author: plugin.authorText,
-                    repo: plugin.repo,
-                    download: generateDownloadLink(plugin.repo)
-                }))
-            };
-            
-            // 设置Content-Type为JSON
-            document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <title>麦麦插件API</title>
-                    <style>
-                        body {
-                            background-color: #1e1e1e;
-                            color: #d4d4d4;
-                            padding: 20px;
-                            font-family: monospace;
-                        }
-                        pre {
-                            white-space: pre-wrap;
-                            word-wrap: break-word;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <pre>${JSON.stringify(response, null, 2)}</pre>
-                </body>
-                </html>
-            `);
-            document.close();
-        }
         
         // 生成GitHub下载链接
         function generateDownloadLink(repoUrl) {
@@ -1072,19 +995,13 @@
         // 从GitHub加载数据
         async function loadPluginData() {
             try {
-                // 如果是API请求，隐藏所有界面元素
-                if (isApiRequest()) {
-                    document.querySelector('.container').style.display = 'none';
-                    document.querySelector('footer').style.display = 'none';
-                } else {
-                    pluginsGrid.innerHTML = `
-                        <div class="loading-container">
-                            <i class="fas fa-spinner loading-icon"></i>
-                            <p>正在从GitHub加载插件数据...</p>
-                        </div>
-                    `;
-                    paginationContainer.innerHTML = '';
-                }
+                pluginsGrid.innerHTML = `
+                    <div class="loading-container">
+                        <i class="fas fa-spinner loading-icon"></i>
+                        <p>正在从GitHub加载插件数据...</p>
+                    </div>
+                `;
+                paginationContainer.innerHTML = '';
                 
                 // 重置进度条
                 syncProgress = 0;
@@ -1124,64 +1041,25 @@
                 filteredPlugins = [...pluginsData]; // 创建副本用于展示
                 currentPage = 1; // 重置为第一页
                 
-                // 处理API请求或正常显示
-                if (isApiRequest()) {
-                    handleApiRequest();
-                } else {
-                    // 完成加载
-                    renderPluginsGrid();
-                    syncProgress = 100;
-                    updateSyncProgress();
-                }
+                // 完成加载
+                renderPluginsGrid();
+                syncProgress = 100;
+                updateSyncProgress();
                 
             } catch (error) {
-                // 错误处理
-                if (isApiRequest()) {
-                    const errorResponse = {
-                        status: 'error',
-                        message: error.message,
-                        errorCode: 500
-                    };
-                    document.write(`
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <meta charset="UTF-8">
-                            <title>麦麦插件API - 错误</title>
-                            <style>
-                                body {
-                                    background-color: #1e1e1e;
-                                    color: #d4d4d4;
-                                    padding: 20px;
-                                    font-family: monospace;
-                                }
-                                pre {
-                                    white-space: pre-wrap;
-                                    word-wrap: break-word;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <pre>${JSON.stringify(errorResponse, null, 2)}</pre>
-                        </body>
-                        </html>
-                    `);
-                    document.close();
-                } else {
-                    console.error('获取插件数据失败:', error);
-                    pluginsGrid.innerHTML = `
-                        <div class="loading-container">
-                            <i class="fas fa-exclamation-circle" style="color: #ff6b6b; font-size: 2.5rem;"></i>
-                            <h3 style="margin: 15px 0">数据加载失败</h3>
-                            <p style="color: var(--light-text); margin-bottom: 20px">${error.message}</p>
-                            <button class="control-btn" onclick="loadPluginData()">
-                                <i class="fas fa-redo"></i>
-                                <span>重试加载</span>
-                            </button>
-                        </div>
-                    `;
-                    renderPagination(); // 清空分页控件
-                }
+                console.error('获取插件数据失败:', error);
+                pluginsGrid.innerHTML = `
+                    <div class="loading-container">
+                        <i class="fas fa-exclamation-circle" style="color: #ff6b6b; font-size: 2.5rem;"></i>
+                        <h3 style="margin: 15px 0">数据加载失败</h3>
+                        <p style="color: var(--light-text); margin-bottom: 20px">${error.message}</p>
+                        <button class="control-btn" onclick="loadPluginData()">
+                            <i class="fas fa-redo"></i>
+                            <span>重试加载</span>
+                        </button>
+                    </div>
+                `;
+                renderPagination(); // 清空分页控件
             }
         }
         
